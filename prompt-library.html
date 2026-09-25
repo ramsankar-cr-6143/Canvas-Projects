@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt library – Choose a design</title>
+<style>
+:root{
+  --page:#ECEBF1;--scrim:rgba(20,18,34,.45);--surface:#FFFFFF;--surface-1:#F4F3F8;
+  --text:#23202F;--text-2:#6F6B80;--focus:#6E68D4;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--page:#15141C;--scrim:rgba(0,0,0,.55);--surface:#1F1E28;--surface-1:#2A2935;--text:#EEEDF3;--text-2:#A09CB2;--focus:#9C93F0}
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--page);color:var(--text);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.scrim{min-height:100vh;background:var(--scrim);display:flex;align-items:flex-start;justify-content:center;padding:48px 16px}
+.modal{background:var(--surface);border-radius:20px;width:100%;max-width:680px;padding:18px 16px 12px;box-shadow:0 20px 60px rgba(20,18,34,.18)}
+.head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 0 8px}
+.head h1{margin:0;font-size:17px;font-weight:600}
+.actions{display:flex;align-items:center;gap:8px}
+.seg{display:flex;background:var(--surface-1);border-radius:8px;padding:2px;gap:2px}
+.seg button{width:30px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text-2);display:flex;align-items:center;justify-content:center}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.ib{width:30px;height:30px;border:none;background:transparent;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-2)}
+.ib:hover{background:var(--surface-1)}
+svg.i{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.chips{display:flex;gap:4px;margin:12px 0 10px;padding:0 4px;flex-wrap:wrap}
+.chip{height:28px;padding:0 12px;font-size:13px;border-radius:999px;border:none;background:transparent;color:var(--text-2)}
+.chip:hover{color:var(--text)}
+.chip.on{background:var(--surface-1);color:var(--text)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px}
+.list{display:flex;flex-direction:column;gap:6px}
+
+.cell,.row{border:none;background:transparent;text-align:left;border-radius:16px;padding:8px;position:relative}
+.cell:hover,.row:hover{background:var(--surface-1)}
+.row{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:20px;align-items:center;width:100%}
+
+.ph{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;transition:transform .2s}
+.cell .ph{aspect-ratio:16/10}
+.cell:hover .ph,.row:hover .ph{transform:translateY(-2px)}
+.ph i.b{position:absolute;display:block}
+.go{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;background:rgba(40,36,64,.25)}
+.cell:hover .go,.cell:focus-visible .go,.cell.busy .go{opacity:1}
+.go span{background:var(--surface);color:var(--text);font-size:12px;padding:5px 11px;border-radius:999px;display:flex;align-items:center;gap:5px}
+.go svg.i{width:13px;height:13px}
+
+.name{font-size:14px;font-weight:600;margin:8px 2px 5px}
+.row .name{font-size:15px;margin:0}
+.desc{font-size:14px;color:var(--text-2);margin-top:2px;display:flex;align-items:center;gap:5px}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin:0 2px}
+.row .tags{justify-content:flex-end;gap:6px}
+.pill{font-size:12px;color:var(--text-2);background:var(--surface-1);padding:3px 9px;border-radius:8px;white-space:nowrap}
+.cell:hover .pill,.row:hover .pill{background:var(--surface)}
+
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:560px){
+  .row{grid-template-columns:120px minmax(0,1fr);gap:14px}
+  .row .tags{grid-column:2;justify-content:flex-start;margin-top:-6px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="scrim">
+  <div class="modal" role="dialog" aria-labelledby="t">
+    <div class="head">
+      <h1 id="t">Choose a design</h1>
+      <div class="actions">
+        <div class="seg" id="seg" role="group" aria-label="View">
+          <button data-v="grid" title="Grid view" aria-label="Grid view">
+            <svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+          </button>
+          <button data-v="list" title="Thumbnail view" aria-label="Thumbnail view">
+            <svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 6h6M14 9h4M14 16h6M14 19h4"/></svg>
+          </button>
+        </div>
+        <button class="ib" aria-label="Close">
+          <svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+const W='rgba(255,255,255,.9)',W2='rgba(255,255,255,.6)',W3='rgba(255,255,255,.36)',K='rgba(48,42,76,.75)',K2='rgba(48,42,76,.27)',K3='rgba(48,42,76,.11)';
+const b=(x,y,w,h,c,r=1.5)=>`<i class="b" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%;background:${c};border-radius:${r}px"></i>`;
+const ln=(x,y,w,c)=>b(x,y,w,0.8,c,0);
+const dot=(x,y,d,c)=>b(x,y,d,d*1.78,c,99);
+const pl=(x,y,w,c)=>b(x,y,w,5.5,c,99);
+const kv=(x,y,w,n,lc,vc,g=8)=>Array.from({length:n},(_,i)=>b(x,y+i*g,w*.32,3,lc)+b(x+w*.4,y+i*g,w*(i%3==1?.35:.55),3,vc)).join('');
+const bars=(x,y,w,h,v,c)=>v.map((q,i)=>b(x+i*(w/v.length),y+h-h*q,w/v.length-1.5,h*q,c,1.5)).join('');
+const head=(x,y,av,nc,sc)=>dot(x,y,7,av)+b(x+9,y+2,24,4.5,nc)+b(x+9,y+9,15,3,sc);
+
+const DESIGNS=[
+{id:'two',cat:'Light',tags:['Light','Basics'],name:'Clean two-column',desc:'Hairline sections, one key metric',g:'linear-gradient(135deg,#FAF19A,#CDE88A)',draw:()=>b(5,6,90,88,W,4)+head(9,11,'#CDE88A',K,K2)+ln(9,28,82,K3)+kv(9,35,36,5,K2,K)+kv(52,35,38,2,K2,K)+b(52,54,39,22,'#EEF6C4',3)+b(55,59,20,7,K)+ln(9,82,82,K3)},
+{id:'kpi',cat:'Light',tags:['Light','Metrics'],name:'KPI-first dashboard',desc:'Key numbers up top, details below',g:'linear-gradient(160deg,#FBEE9E 10%,#F9C07E)',draw:()=>head(5,7,W,K,K2)+[5,28.5,52,75.5].map(x=>b(x,25,19.5,22,W,3)+b(x+3,30,9,2.5,K2)+b(x+3,35,12,6,K)).join('')+b(5,52,56,42,W,3)+bars(9,58,48,30,[.4,.6,.5,.8,.7,1],'#F9C07E')+b(64,52,31,42,W2,3)+kv(67,58,26,4,K2,K)},
+{id:'bento',cat:'Light',tags:['Light'],name:'Bento grid',desc:'Mixed tiles for related fields',g:'radial-gradient(circle at 40% 35%,#FFD7B0,#F8B385 60%,#EE9270)',draw:()=>b(4,5,92,17,W,3)+head(7,7.5,'#F8B385',K,K2)+b(4,26,54,35,W,3)+kv(8,32,46,4,K2,K)+b(61,26,35,16,W2,3)+b(61,45,35,16,W3,3)+b(4,65,34,30,W2,3)+bars(8,70,26,20,[.5,.8,.6,1],'#EE9270')+b(41,65,55,30,W,3)},
+{id:'cmd',cat:'Dark',tags:['Dark','Metrics'],name:'Dark command centre',desc:'Dense monitoring on a dark base',g:'linear-gradient(135deg,#9A88E0,#D39AE0 55%,#DE8AB0)',draw:()=>b(0,0,100,100,'rgba(44,34,84,.3)',0)+head(5,7,W,W,W3)+[5,28.5,52,75.5].map(x=>b(x,24,19.5,20,W3,3)+b(x+3,30,12,5,W)+b(x+3,38,8,2.5,W2)).join('')+b(5,49,58,46,W3,3)+bars(9,56,50,32,[.3,.5,.4,.7,.6,.9,.75,1],W2)+b(66,49,29,46,W3,3)+[0,1,2,3].map(i=>dot(69,54+i*10,3.5,W)+b(74,55+i*10,17,2.5,W2)).join('')},
+{id:'indigo',cat:'Dark',tags:['Dark'],name:'Dark with indigo accent',desc:'Indigo header on a deep page',g:'linear-gradient(160deg,#9C93F0,#6E68D4 50%,#5250B0)',draw:()=>dot(5,7,9,W)+b(16,9,32,5,W)+b(16,17,18,3,W2)+pl(74,10,20,W3)+ln(5,30,90,W3)+kv(5,38,40,6,W3,W2)+kv(53,38,40,2,W3,W2)+b(53,58,42,32,W3,3)+b(57,64,18,6,W)},
+{id:'hero',cat:'Bold',tags:['Bold'],name:'Gradient hero',desc:'Big colour band with the record name',g:'linear-gradient(135deg,#A8E9D2,#6CC6BE)',draw:()=>dot(6,9,9,W)+b(6,30,46,8,W)+b(6,42,26,3.5,W2)+b(66,11,27,26,W,3)+b(69,16,11,2.5,K2)+b(69,22,18,7,K)+b(0,52,100,48,W,0)+kv(6,59,38,5,K2,K)+kv(54,59,38,5,K2,K)},
+{id:'tiles',cat:'Bold',tags:['Bold','Colourful'],name:'Colourful tiles',desc:'One tinted tile per field group',g:'linear-gradient(135deg,#BBDDFD,#8FA9F2)',draw:()=>head(5,7,W,K,K2)+[[5,24,W],[51.5,24,W2],[5,61,W2],[51.5,61,W]].map(([x,y,c])=>b(x,y,43.5,33,c,3)+dot(x+3,y+5,5.5,'#8FA9F2')+kv(x+3,y+16,37,2,K2,K,8)).join('')},
+{id:'table',cat:'Compact',tags:['Compact','Tables'],name:'Dense data table',desc:'Tight rows for power users',g:'linear-gradient(135deg,#E6F59E,#97DEC0)',draw:()=>b(5,6,26,5,K)+b(4,15,92,81,W,3)+b(4,15,92,8,W2,0)+Array.from({length:8},(_,i)=>{const y=25+i*8.6;return ln(6,y+7.5,88,K3)+b(8,y+2.5,18,2.6,K)+b(32,y+2.5,15,2.6,K2)+pl(56,y+1.2,12,['#E6F59E','#B8EAD4','#EEF8C4'][i%3])}).join('')},
+{id:'side',cat:'Compact',tags:['Compact'],name:'Sidebar workspace',desc:'Section nav with content beside it',g:'linear-gradient(135deg,#FFD0BA,#F5A3BC)',draw:()=>[0,1,2,3,4,5].map(i=>b(4,10+i*12,17,7,i==1?W:W3,2)).join('')+b(26,4,70,92,W,4)+b(30,10,34,6,K)+kv(30,24,30,5,K2,K)+b(64,22,28,28,'#FCDDE6',3)+b(67,28,16,6,K)+b(30,62,62,28,'#FFEDE4',3)},
+{id:'story',cat:'Focused',tags:['Focused'],name:'Single column story',desc:'One readable column, top to bottom',g:'linear-gradient(135deg,#FFB9CE,#FFCC9E)',draw:()=>b(25,0,50,100,W,0)+dot(45,6,10,'#FFBFAE')+b(31,30,38,6,K)+ln(29,42,42,K3)+kv(29,48,42,3,K2,K,7)+b(29,72,42,12,'#FFE8DC',3)+kv(29,89,42,1,K2,K)}
+];
+
+const ICON_SPARK='<svg class="i" viewBox="0 0 24 24"><path d="M12 4l1.8 4.6L18 10l-4.2 1.4L12 16l-1.8-4.6L6 10l4.2-1.4z"/><path d="M18 16l.8 2 .2.2 2 .8-2 .8-.2.2-.8 2-.8-2-.2-.2-2-.8 2-.8.2-.2z"/></svg>';
+const ICON_LOAD='<svg class="i spin" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 3a9 9 0 1 0 9 9"/></svg>';
+const CATS=['All','Light','Dark','Bold','Compact','Focused'];
+let cat='All',busy=null,view='grid';
+const $=id=>document.getElementById(id);
+
+function render(){
+  $('chips').innerHTML=CATS.map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${c}" aria-pressed="${c===cat}">${c}</button>`).join('');
+  $('seg').querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x.dataset.v===view);x.setAttribute('aria-pressed',x.dataset.v===view)});
+  const items=DESIGNS.filter(d=>cat==='All'||d.cat===cat);
+  const tags=d=>`<div class="tags">${d.tags.map(t=>`<span class="pill">${t}</span>`).join('')}</div>`;
+  const list=$('list');
+  if(view==='grid'){
+    list.className='grid';
+    list.innerHTML=items.map(d=>`<button class="cell ${d.id===busy?'busy':''}" data-id="${d.id}" aria-label="Generate ${d.name}">
+      <div class="ph" style="background:${d.g}">${d.draw()}<div class="go"><span>${d.id===busy?ICON_LOAD+' Generating…':ICON_SPARK+' Generate'}</span></div></div>
+      <div class="name">${d.name}</div>${tags(d)}</button>`).join('');
+  }else{
+    list.className='list';
+    list.innerHTML=items.map(d=>`<button class="row" data-id="${d.id}" aria-label="Generate ${d.name}">
+      <div class="ph" style="background:${d.g}">${d.draw()}</div>
+      <div><div class="name">${d.name}</div><div class="desc">${d.id===busy?ICON_LOAD+' Generating…':d.desc}</div></div>${tags(d)}</button>`).join('');
+  }
+}
+$('chips').addEventListener('click',e=>{const c=e.target.closest('[data-c]');if(c){cat=c.dataset.c;render();}});
+$('seg').addEventListener('click',e=>{const v=e.target.closest('[data-v]');if(v){view=v.dataset.v;render();}});
+$('list').addEventListener('click',e=>{const r=e.target.closest('[data-id]');if(r){busy=r.dataset.id;render();setTimeout(()=>{busy=null;render();},1800);}});
+render();
+</script>
+</body>
+</html>
